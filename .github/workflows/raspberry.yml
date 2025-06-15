@@ -1,4 +1,4 @@
-name: Build RTL8812AU Kernel Module
+name: Build RTL8821AU Module for Xiaomi Lavender
 
 on:
   workflow_dispatch:
@@ -7,16 +7,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout driver
-        uses: actions/checkout@v4
-
-      - name: Checkout kernel source
+      - name: Checkout rtl8812au driver
         uses: actions/checkout@v4
         with:
-          repository: sd12443/android_kernel_xiaomi_lavender
+          path: rtl8812au
+
+      - name: Checkout lavender kernel source
+        uses: actions/checkout@v4
+        with:
+          repository: Narayankarsd/Xiaomi_Kernel_OpenSource
           path: kernel
-          fetch-depth: 0         # full history, NOT shallow
-          submodules: true       # fetch submodules, if any
+          ref: lavender-q-oss
+          fetch-depth: 0
+          submodules: true
 
       - name: Install dependencies
         run: |
@@ -25,10 +28,8 @@ jobs:
 
       - name: Download Linaro toolchains
         run: |
-          # 64-bit toolchain
           wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
           tar -xf gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
-          # 32-bit toolchain
           wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
           tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
           echo "${GITHUB_WORKSPACE}/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin" >> $GITHUB_PATH
@@ -49,10 +50,10 @@ jobs:
           export ARCH=arm64
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
-          make -C kernel M=$GITHUB_WORKSPACE modules
+          make -C kernel M=$GITHUB_WORKSPACE/rtl8812au modules
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rtl8812au.ko
-          path: 8812au.ko
+          name: rtl8821au.ko
+          path: rtl8812au/8812au.ko
