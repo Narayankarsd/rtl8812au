@@ -15,6 +15,7 @@ jobs:
         with:
           repository: sd12443/android_kernel_xiaomi_lavender
           path: kernel
+          fetch-depth: 0   # important for full kernel source!
 
       - name: Install dependencies
         run: |
