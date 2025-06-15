@@ -19,19 +19,25 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y bc kmod libssl-dev flex bison
+          sudo apt-get install -y bc kmod libssl-dev flex bison wget xz-utils
 
-      - name: Download Linaro toolchain
+      - name: Download Linaro toolchains
         run: |
+          # 64-bit toolchain
           wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
           tar -xf gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu.tar.xz
+          # 32-bit toolchain
+          wget https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/arm-linux-gnueabi/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
+          tar -xf gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi.tar.xz
           echo "${GITHUB_WORKSPACE}/gcc-linaro-7.5.0-2019.12-x86_64_aarch64-linux-gnu/bin" >> $GITHUB_PATH
+          echo "${GITHUB_WORKSPACE}/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabi/bin" >> $GITHUB_PATH
 
       - name: Prepare kernel source
         run: |
           cd kernel
           export ARCH=arm64
           export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           make lavender_defconfig
           make modules_prepare
 
@@ -39,6 +45,7 @@ jobs:
         run: |
           export ARCH=arm64
           export CROSS_COMPILE=aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabi-
           make -C kernel M=$GITHUB_WORKSPACE modules
 
       - name: Upload artifact
